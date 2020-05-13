@@ -1,9 +1,7 @@
 {
-  "type": "postgres",
-  "host": "localhost",
-  "port": 5432,
-  "username": "postgres",
-  "password": "docker",
+  "type": "mongodb",
+  "host": "0.0.0.0",
+  "port": 27017,
   "database": "gostack_desafio06",
   "entities": ["./src/models/*.ts"],
   "migrations": ["./src/database/migrations/*.ts"],
