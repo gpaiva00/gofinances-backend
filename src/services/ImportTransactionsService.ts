@@ -44,9 +44,9 @@ class ImportTransactionsService {
         title: transaction.title,
         type: transaction.type,
         value: transaction.value,
-        category_id: allCategories.find(
+        category: allCategories.find(
           category => category.title === transaction.category,
-        )?.id,
+        ),
       })),
     );
 
