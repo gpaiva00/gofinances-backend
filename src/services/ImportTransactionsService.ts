@@ -1,4 +1,4 @@
-import { getRepository, getCustomRepository } from 'typeorm';
+import { getRepository, getCustomRepository, In } from 'typeorm';
 import path from 'path';
 import fs from 'fs';
 import TransactionsRepository from '../repositories/TransactionsRepository';
@@ -19,7 +19,7 @@ class ImportTransactionsService {
 
     const existentCategories = await categoriesRepository.find({
       where: {
-        title: { $in: categories },
+        title: In(categories),
       },
     });
 
@@ -46,7 +46,7 @@ class ImportTransactionsService {
         value: transaction.value,
         category_id: allCategories.find(
           category => category.title === transaction.category,
-        )?.title,
+        )?.id,
       })),
     );
 

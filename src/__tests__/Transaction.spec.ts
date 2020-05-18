@@ -13,21 +13,17 @@ let connection: Connection;
 describe('Transaction', () => {
   beforeAll(async () => {
     connection = await createConnection('test-connection');
-    // await connection.query('DROP TABLE IF EXISTS transactions');
-    // await connection.query('DROP TABLE IF EXISTS categories');
-    // await connection.query('DROP TABLE IF EXISTS migrations');
-    // await connection.runMigrations();
+
+    await connection.query('DROP TABLE IF EXISTS transactions');
+    await connection.query('DROP TABLE IF EXISTS categories');
+    await connection.query('DROP TABLE IF EXISTS migrations');
+
+    await connection.runMigrations();
   });
 
   beforeEach(async () => {
-    const transactionsRepository = connection.getMongoRepository(Transaction);
-    const categoriesRepository = connection.getMongoRepository(Category);
-
-    await transactionsRepository.deleteMany({});
-    await categoriesRepository.deleteMany({});
-
-    // await connection.query('DELETE FROM transactions');
-    // await connection.query('DELETE FROM categories');
+    await connection.query('DELETE FROM transactions');
+    await connection.query('DELETE FROM categories');
   });
 
   afterAll(async () => {

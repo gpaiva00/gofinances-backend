@@ -44,8 +44,8 @@ class CreateTransactionService {
 
     const transaction = await transactionRepository.create({
       title,
-      value,
       type,
+      value,
       category_id: category.id,
     });
 
