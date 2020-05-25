@@ -21,7 +21,7 @@ class Transaction {
   @Column()
   type: 'income' | 'outcome';
 
-  @Column('decimal')
+  @Column('float')
   value: number;
 
   @ManyToOne(() => Category)
