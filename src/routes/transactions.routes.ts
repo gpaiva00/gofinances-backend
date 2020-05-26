@@ -8,19 +8,40 @@ import CreateTransactionService from '../services/CreateTransactionService';
 import DeleteTransactionService from '../services/DeleteTransactionService';
 import ImportTransactionsService from '../services/ImportTransactionsService';
 
+import AppError from '../errors/AppError';
+
 const transactionsRouter = Router();
 
 const upload = multer(uploadConfig);
 
 transactionsRouter.get('/', async (request, response) => {
-  const transactionRepository = getCustomRepository(TransactionsRepository);
-  const transactions = await transactionRepository.find({
-    relations: ['category'],
-    order: { created_at: 'DESC' },
-  });
-  const balance = await transactionRepository.getBalance();
+  try {
+    const currentMonth = new Date().getMonth() + 1;
+    const { month = currentMonth } = request.query;
+    const queryMonth = month || currentMonth;
 
-  return response.json({ transactions, balance });
+    const startDate = new Date(`2020-${queryMonth}-01`);
+    const endDate = new Date(2020, Number(queryMonth), 0);
+
+    const transactionRepository = getCustomRepository(TransactionsRepository);
+    const transactions = await transactionRepository
+      .createQueryBuilder('t')
+      .orderBy('t.created_at', 'DESC')
+      .innerJoinAndSelect('t.category', 'category')
+      .andWhere(
+        `t.created_at BETWEEN '${startDate.toISOString()}' AND '${endDate.toISOString()}'`,
+      )
+      .getMany();
+
+    const balance = await transactionRepository.getBalance();
+
+    return response.json({ transactions, balance });
+  } catch (error) {
+    console.log(error);
+    throw new AppError(
+      'Não foi possível buscar as transações. Tente mais tarde.',
+    );
+  }
 });
 
 transactionsRouter.post('/', async (request, response) => {
