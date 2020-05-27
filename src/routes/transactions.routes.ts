@@ -16,12 +16,13 @@ const upload = multer(uploadConfig);
 
 transactionsRouter.get('/', async (request, response) => {
   try {
+    const params = request.query;
     const currentMonth = new Date().getMonth() + 1;
-    const { month = currentMonth } = request.query;
-    const queryMonth = month || currentMonth;
+    const month = params.month || currentMonth;
+    const currentYear = new Date().getUTCFullYear();
 
-    const startDate = new Date(`2020-${queryMonth}-01`);
-    const endDate = new Date(2020, Number(queryMonth), 0);
+    const startDate = new Date(`${currentYear}-${month}-01`);
+    const endDate = new Date(currentYear, Number(month), 0);
 
     const transactionRepository = getCustomRepository(TransactionsRepository);
     const transactions = await transactionRepository
@@ -33,7 +34,7 @@ transactionsRouter.get('/', async (request, response) => {
       )
       .getMany();
 
-    const balance = await transactionRepository.getBalance();
+    const balance = await transactionRepository.getBalance(transactions);
 
     return response.json({ transactions, balance });
   } catch (error) {

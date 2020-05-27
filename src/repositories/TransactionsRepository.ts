@@ -10,8 +10,22 @@ interface Balance {
 
 @EntityRepository(Transaction)
 class TransactionsRepository extends Repository<Transaction> {
-  public async getBalance(): Promise<Balance> {
-    const transactions = await this.find();
+  public async getBalance(transactions?: Transaction[]): Promise<Balance> {
+    if (!transactions) {
+      const currentYear = new Date().getUTCFullYear();
+      const currentMonth = new Date().getMonth() + 1;
+
+      const startDate = new Date(`${currentYear}-${currentMonth}-01`);
+      const endDate = new Date(currentYear, currentMonth, 0);
+
+      transactions = await this.createQueryBuilder('t')
+        .orderBy('t.created_at', 'DESC')
+        .innerJoinAndSelect('t.category', 'category')
+        .andWhere(
+          `t.created_at BETWEEN '${startDate.toISOString()}' AND '${endDate.toISOString()}'`,
+        )
+        .getMany();
+    }
 
     const { outcome, income } = transactions.reduce(
       (acc, transaction) => {
