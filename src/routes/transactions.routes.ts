@@ -4,6 +4,7 @@ import { getCustomRepository } from 'typeorm';
 import uploadConfig from '../config/upload';
 
 import TransactionsRepository from '../repositories/TransactionsRepository';
+import FindTransactionsService from '../services/FindTransactionsService';
 import CreateTransactionService from '../services/CreateTransactionService';
 import DeleteTransactionService from '../services/DeleteTransactionService';
 import ImportTransactionsService from '../services/ImportTransactionsService';
@@ -16,25 +17,13 @@ const upload = multer(uploadConfig);
 
 transactionsRouter.get('/', async (request, response) => {
   try {
-    const params = request.query;
-    const currentMonth = new Date().getMonth() + 1;
-    const month = params.month || currentMonth;
-    const currentYear = new Date().getUTCFullYear();
+    const { month: monthParam } = request.query;
 
-    const startDate = new Date(`${currentYear}-${month}-01`);
-    const endDate = new Date(currentYear, Number(month), 0);
+    const transactionsRepository = getCustomRepository(TransactionsRepository);
+    const findTransactions = new FindTransactionsService(transactionsRepository);
 
-    const transactionRepository = getCustomRepository(TransactionsRepository);
-    const transactions = await transactionRepository
-      .createQueryBuilder('t')
-      .orderBy('t.created_at', 'DESC')
-      .innerJoinAndSelect('t.category', 'category')
-      .andWhere(
-        `t.created_at BETWEEN '${startDate.toISOString()}' AND '${endDate.toISOString()}'`,
-      )
-      .getMany();
-
-    const balance = await transactionRepository.getBalance(transactions);
+    const transactions = await findTransactions.execute(monthParam);
+    const balance = await transactionsRepository.getBalance(transactions);
 
     return response.json({ transactions, balance });
   } catch (error) {
