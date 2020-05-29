@@ -10,3 +10,7 @@ tmp/*
 
 yarn.lock
 yarn-error.log
+
+*.env
+*.env.*
+!.env.sample
