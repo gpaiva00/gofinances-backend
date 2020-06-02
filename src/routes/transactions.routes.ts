@@ -9,25 +9,30 @@ import CreateTransactionService from '../services/CreateTransactionService';
 import DeleteTransactionService from '../services/DeleteTransactionService';
 import ImportTransactionsService from '../services/ImportTransactionsService';
 
+import ensureAuthenticated from '../middlewares/ensureAuthenticated';
+
 import AppError from '../errors/AppError';
+
+const upload = multer(uploadConfig);
 
 const transactionsRouter = Router();
 
-const upload = multer(uploadConfig);
+transactionsRouter.use(ensureAuthenticated);
 
 transactionsRouter.get('/', async (request, response) => {
   try {
     const { month: monthParam } = request.query;
 
     const transactionsRepository = getCustomRepository(TransactionsRepository);
-    const findTransactions = new FindTransactionsService(transactionsRepository);
+    const findTransactions = new FindTransactionsService(
+      transactionsRepository,
+    );
 
     const transactions = await findTransactions.execute(monthParam);
     const balance = await transactionsRepository.getBalance(transactions);
 
     return response.json({ transactions, balance });
   } catch (error) {
-    console.log(error);
     throw new AppError(
       'Não foi possível buscar as transações. Tente mais tarde.',
     );
@@ -37,12 +42,14 @@ transactionsRouter.get('/', async (request, response) => {
 transactionsRouter.post('/', async (request, response) => {
   const { title, value, type, category: categoryTitle } = request.body;
   const createTransaction = new CreateTransactionService();
+  const userId = request.user.id;
 
   const transaction = await createTransaction.execute({
     title,
     value,
     type,
     categoryTitle,
+    userId,
   });
 
   return response.json(transaction);

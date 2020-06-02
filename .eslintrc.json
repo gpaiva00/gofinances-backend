@@ -32,7 +32,8 @@
       "argsIgnorePattern": "_"
     }],
     "import/extensions": [
-      "error",
+      "error", // quero que mostre erros
+      // mas ignore erros de importação para os arquivos com extensao .ts
       "ignorePackages",
       {
         "ts": "never"

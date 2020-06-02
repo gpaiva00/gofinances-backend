@@ -11,6 +11,7 @@ interface Request {
   value: number;
   type: 'income' | 'outcome';
   categoryTitle: string;
+  userId: string;
 }
 
 class CreateTransactionService {
@@ -19,6 +20,7 @@ class CreateTransactionService {
     value,
     type,
     categoryTitle,
+    userId,
   }: Request): Promise<Transaction> {
     const transactionRepository = getCustomRepository(TransactionRepository);
     const categoryRepository = getRepository(Category);
@@ -47,6 +49,7 @@ class CreateTransactionService {
       type,
       value,
       category,
+      user_id: userId,
     });
 
     await transactionRepository.save(transaction);
