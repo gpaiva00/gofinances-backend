@@ -3,7 +3,7 @@ import { sign } from 'jsonwebtoken';
 import User from '../models/User';
 import authConfig from '../config/auth';
 
-// import AppError from '../errors/AppError';
+import AppError from '../errors/AppError';
 
 interface Request {
   email: string;
@@ -20,7 +20,7 @@ class AuthenticateUserService {
 
     const user = await userRepository.findOne({ where: { email } });
 
-    // if (!user) throw new AppError('Incorrect email/password', 401);
+    if (!user) throw new AppError('Incorrect email/password', 401);
 
     const { expiresIn, secret } = authConfig.jwt;
 

@@ -22,14 +22,18 @@ transactionsRouter.use(ensureAuthenticated);
 transactionsRouter.get('/', async (request, response) => {
   try {
     const { month: monthParam } = request.query;
+    const userId = request.user.id;
 
     const transactionsRepository = getCustomRepository(TransactionsRepository);
     const findTransactions = new FindTransactionsService(
       transactionsRepository,
     );
 
-    const transactions = await findTransactions.execute(monthParam);
-    const balance = await transactionsRepository.getBalance(transactions);
+    const transactions = await findTransactions.execute({ monthParam, userId });
+    const balance = await transactionsRepository.getBalance({
+      transactions,
+      userId,
+    });
 
     return response.json({ transactions, balance });
   } catch (error) {

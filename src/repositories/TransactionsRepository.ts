@@ -9,12 +9,21 @@ interface Balance {
   total: number;
 }
 
+interface AppProps {
+  transactions?: Transaction[];
+  userId: string;
+}
+
 @EntityRepository(Transaction)
 class TransactionsRepository extends Repository<Transaction> {
-  public async getBalance(transactions?: Transaction[]): Promise<Balance> {
+  public async getBalance({
+    transactions,
+    userId,
+  }: AppProps): Promise<Balance> {
     if (!transactions) {
       const findTransactionsService = new FindTransactionsService(this);
-      transactions = await findTransactionsService.execute();
+      // eslint-disable-next-line no-param-reassign
+      transactions = await findTransactionsService.execute({ userId });
     }
 
     const { outcome, income } = transactions.reduce(
